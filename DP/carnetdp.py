@@ -1,30 +1,119 @@
 import pandas as pd
+import numpy as np
 from scipy.stats import truncnorm
 import random
 
 random.seed(42)
 class vehicle:
-    def __init__(self,eq_no,eq_desc,age,dept,miles2020,mpg2020,vmt2020,mandr2020,cumulativemandr,mpg,emission,vmt,decision,annualmiles,vtype,mandr,fuel):
+    def __init__(self,eq_no,eq_desc,vtype,dept,dept_id, purchasedate,age2020,current_age,purchaseprice,depreciated2020,miles2020,vmt2020,mandr2020,cumulativemandr2020,totcum_mandr, mpg2020,emission2020, vmt, replacementvehicle_id, replacement_vehicle_desc,replacement_vehicle_purchaseprice,replacement_vehicle_mpge,replacement_vehicle_type,decision):
         self.eq_no = eq_no
         self.eq_desc = eq_desc
-        self.age= age
+        self.age2020= age2020
+        self.current_age= current_age
         self.dept= dept
+        self.deptid = dept_id
+
         
         self.miles2020= miles2020
         self.mpg2020= mpg2020
         self.vmt2020 = vmt2020
         self.mandr2020= mandr2020
-        self.cumulativemandr= cumulativemandr
+        self.cumulativemandr= cumulativemandr2020
+        self.depreceated2020= depreciated2020
+        self.vtype= vtype
+        
+        
+        self.replacementvehicle_id = replacementvehicle_id
+        self.replacement_vehicle_desc = replacement_vehicle_desc
+        self.replacement_vehicle_purchaseprice=replacement_vehicle_purchaseprice
+        self.replacement_vehicle_mpge = replacement_vehicle_mpge	
+        self.replacement_vehicle_type=  replacement_vehicle_type  
 
-        self.vtype= vtype 
-        self.vmt= vmt
-
-        self.mpg= mpg #dict
         self.decision= decision #dict
-        self.annualmiles =annualmiles #dict
-        self.emission= emission #dict
-        self.mandr= mandr #dict
-        self.fuel= fuel #dict
+
+    @property
+    def annualmiles(self):
+        miles_dict= {}
+        #Assigning same miles for all the years in the planning horizon
+        for t in interval:
+            miles_dict[t]= v.miles2020
+        return miles_dict
+    
+    @property
+    def mpg(self,option):
+        mpg_dict= {}
+        computedmpg= v.mpg2020
+        if option == "constant":
+            factor=1
+        #assumes a 10% deterioration rate every year
+        elif option == "deterioration":
+            factor = 0.9
+            for t in range(interval):
+                computedmpg= computedmpg* factor
+                mpg_dict[t]= computedmpg
+        return mpg_dict
+
+    @property
+    def fuel(self):
+        
+        fuel_dict={}
+
+        #truncated normal distribution for fuel price per gallon
+        lower, upper= 2,3
+        mu,sigma= 2.3,0.05
+        f_x= truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+        f_p= f_x.rvs(interval)
+        
+        for t in range(interval):
+            fuel_dict[t]= v.annualmiles[t] * f_p[t]
+        return fuel_dict
+
+    @property
+    def mandr(self,option):
+        mandr_dict= {}
+        computedmandr= v.mandr2020
+        
+        if option == "constant":
+            factor= 1
+        elif option == "growth":
+            factor=1.15
+        for t in range(interval):
+            computedmandr= computedmandr *factor
+            mandr_dict[t]= computedmandr
+        
+        return mandr_dict
+
+    @property
+    def purchase(self,replacement_v,option):
+        purchase_dict={}
+        computedpp= replacement_v.pp
+        if option == "constant":
+            factor=1.1
+        for t in range(interval):
+            computedpp= computedpp* factor
+            purchase_dict[t]= computedpp
+
+        return purchase_dict
+    @property
+    def emission(self):
+        pass
+
+    @property
+    def depreciation(self):
+        age= v.current_age
+        cur_depvalue = v.depreceated2020
+        depreciation_dict={}
+        for t in range(interval):
+            age+=1
+            if 0<= age <=1:
+                cur_depvalue = cur_depvalue - 0.25*cur_depvalue
+                depreciation_dict[t] = cur_depvalue
+            elif 2 <= age > 30:
+                cur_depvalue = cur_depvalue - 0.12*cur_depvalue
+                depreciation_dict[t] = cur_depvalue
+        
+        return depreciation_dict
+    
 
 class portfoliocosts:
     def __init__(self,totfuelcost,totmandrcost,totpurchcost,totemission):
@@ -50,94 +139,85 @@ UI_params = {
     # 'maintenance_budget_rate':0.03,
 }
 class projections:
-    def annualmiles(self,v):
-        miles_dict= {}
-        #Assigning same miles for all the years in the planning horizon
-        for t in interval:
-            miles_dict[t]= v.miles2020
-        return miles_dict
+    def __init__(self, vehicle):
+        self.v = vehicle
 
-    def mpg(self,v, option):
-        mpg_dict= {}
-        computedmpg= v.mpg2020
-        if option == "constant":
-            factor=1
-        #assumes a 10% deterioration rate every year
-        elif option == "deterioration":
-            factor = 0.9
-            for t in range(interval):
-                computedmpg= computedmpg* factor
-                mpg_dict[t]= computedmpg
-        return mpg_dict
+    
 
-    def fuel(self,v):
-        
-        fuel_dict={}
-
-        #truncated normal distribution for fuel price per gallon
-        lower, upper= 2,3
-        mu,sigma= 2.3,0.05
-        f_x= truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
-        f_p= f_x.rvs(interval)
-        
-        for t in range(interval):
-            fuel_dict[t]= v.annualmiles[t] * f_p[t]
-        return fuel_dict
-
-    def mandr(self,v,option):
-        mandr_dict= {}
-        computedmandr= v.mandr2020
-        if option == "constant":
-            factor= 1
-        elif option == "growth":
-            factor=1.15
-        for t in range(interval):
-            computedmandr= computedmandr *factor
-            mandr_dict[t]= computedmandr
-        
-        return mandr_dict
-
-    def purchase(self,v,replacement_v,option):
-        purchase_dict={}
-        computedpp= replacement_v.pp
-        if option == "constant":
-            factor=1.1
-        for t in range(interval):
-            computedpp= computedpp* factor
-            purchase_dict[t]= computedpp
-
-        return purchase_dict
-    def emission(self):
-        pass
-
+# decides whether to keep or replace a given vehicle based on intrinsic numbers without the budget in mind
 class dynamic_prog:
-    def contributionfuncion(self,v):
+    def contributionfuncion(self,v,t):
         decision= 'keep'
         #compute contribution function
+        C_tx = np.zeros((t,interval-t))
+        
+        #initialize all the costs to zero
+        P_t= 0
+        M_t= 0
+        E_t = 0
+        F_t = 0
+        g_t= {}
 
-        if v.decision== 'replace':
-            #replace vehicle with corresponding AV
-            replacevehicle(v)
-                    
+        g_t[interval]= 10000
+
+        #--- Current year costs ---- #
+        # purchase cost adjusted with depreciation
+        for x in range(t+1,interval):
+            P_t = v.replacement_vehicle_purchaseprice - v.depreciation[x]
             
-        return decision
-       
-    def replacevehicle(self,v,replacement_v):
-        replacement_v= get_replacementvehicle(v)
-        pass
+            for i in range(t,x):
+                M_t = M_t+ v.mandr[i]
+                E_t= E_t+ (v.emission[i] * emission_to_dollar)
+                F_t = F_t+ v.fuel[i]
 
-vehicle_info= pd.read_csv("vehicle_info.csv")
+            C_tx[i][x] = P_t + M_t + E_t+ F_t
+
+
+        # ----- Future years costs ---- #
+        for i in range(interval,t,-1):
+            for x in range(t+1,interval):
+                g_t[i] = min(C_tx[i]+g_t[x])
+
+        print(g_t)
+        decision= {}
+        return decision
+
+
+vehicle_info= pd.read_csv("vehicle_info17mar.csv")
 # replacement_info= pd.read_csv("replacement_info.csv")
 vportfolio=[]
+emission_to_dollar = 120
 
 colnames= list(vehicle_info.columns.values)
-for index,rows in vehicle_info.iterrows():
+for index,row in vehicle_info.iterrows():
+    eq_no= row['equipmentid']
+    eq_desc= row['vehicledescription']
+    vtype = row['vehicle_type']
+    dept= row['dept_name']
+    dept_id =row['deptid']
+    purchasedate= row['purchasedate']
+    age2020= row['age2020']
+    current_age = age2020
+    purchaseprice= row['purchaseprice']
+    depreciated2020 = row['depreceated_value']
+    miles2020= row['miles2020']
+    vmt2020= row['cumulative_miles']
+    mandr2020= row['maintenance2020']
+    cumulativemandr2020= row['cumulative_maintenace']
+    totcum_mandr = cumulativemandr2020
+    mpg2020= row['mpg2020']
+    emission2020= row['emissions2020']
+    vmt= vmt2020
+    replacementvehicle_id = row['replacementvehicle_id']
+    replacement_vehicle_desc = row['replacement_vehicle_desc']
+    replacement_vehicle_purchaseprice = row['replacement_vehicle_purchaseprice']
+    replacement_vehicle_mpge = row['replacement_vehicle_mpge']		
+    replacement_vehicle_type= row['replacement_vehicle_type']   
+    decision = {}
     
-    # equipmentid	description	dept	
-    # deptid	purchasedate	purchaseprice	depreceated value	miles2020	cumulative_miles	maintenance2020	mpg2020	emissions2020
 
-    v= vehicle(eq_no,eq_desc,age,dept,miles2020,mpg2020,vmt2020,
-    mandr2020,cumulativemandr,mpg,emission,vmt,decision,annualmiles,vtype,mandr,fuel)
+    v= vehicle(eq_no,eq_desc,vtype,dept,dept_id, purchasedate,age2020,current_age,purchaseprice,depreciated2020,miles2020,vmt2020,mandr2020,cumulativemandr2020,totcum_mandr, mpg2020,emission2020, vmt, replacementvehicle_id, replacement_vehicle_desc,replacement_vehicle_purchaseprice,replacement_vehicle_mpge,replacement_vehicle_type,decision)
+    proj= projections(v)
     vportfolio.append(v)
 
 interval = UI_params['start_year'] - UI_params['end_year']
@@ -148,12 +228,20 @@ def main():
     for t in range(interval):
         for v in vportfolio:
             #check if vehicle is eligible based on threshold miles
+            
             if v.vmt>= UI_params['min_miles_replacement_threshold']:
                 eligiblevehicles.append(v)
                 #start DP calculations
                 dp_optimizer= dynamic_prog()
-                v.decision = dp_optimizer.contributionfuncion(v)
-                
+                v.decision = dp_optimizer.contributionfuncion(v,t)
+
+            v.current_age+=1
+            v.vmt= v.vmt+ v.annualmiles[t]
+            v.totcum_mandr = v.totcum_mandr+ v.mandr[t]
+
+
+            
+                            
 if __name__ == "__main__":
     main()
 
