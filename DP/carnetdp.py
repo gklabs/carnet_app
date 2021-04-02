@@ -17,6 +17,7 @@ class vehicle:
         self.miles2020= miles2020
         self.mpg2020= mpg2020
         self.vmt2020 = vmt2020
+        self.vmt=vmt
         self.mandr2020= mandr2020
         self.cumulativemandr= cumulativemandr2020
         self.depreceated2020= depreciated2020
@@ -35,41 +36,48 @@ class vehicle:
     def annualmiles(self):
         miles_dict= {}
         #Assigning same miles for all the years in the planning horizon
-        for t in interval:
-            miles_dict[t]= v.miles2020
+        for t in range(interval):
+            miles_dict[t]= self.miles2020
         return miles_dict
     
     @property
-    def mpg(self,option):
+    def mpg(self):
         mpg_dict= {}
-        computedmpg= v.mpg2020
+        option= "constant"
+        computedmpg= self.mpg2020
         if option == "constant":
             factor=1
         #assumes a 10% deterioration rate every year
         elif option == "deterioration":
             factor = 0.9
-            for t in range(interval):
-                computedmpg= computedmpg* factor
-                mpg_dict[t]= computedmpg
+        for t in range(interval):
+            computedmpg= computedmpg* factor
+            mpg_dict[t]= computedmpg
         return mpg_dict
 
+   
     @property
     def fuel(self):
         
         fuel_dict={}
+        option = "constant"
 
+        if option == "random":
         #truncated normal distribution for fuel price per gallon
-        lower, upper= 2,3
-        mu,sigma= 2.3,0.05
-        f_x= truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
-        f_p= f_x.rvs(interval)
+            lower, upper= 2,3
+            mu,sigma= 2.3,0.05
+            f_x= truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+            f_p= f_x.rvs(interval)
+        elif option == "constant":
+            f_p= np.repeat(2.3,interval)
         
         for t in range(interval):
-            fuel_dict[t]= v.annualmiles[t] * f_p[t]
+            fuel_dict[t]= self.annualmiles[t]/self.mpg[t] * f_p[t]
         return fuel_dict
 
     @property
-    def mandr(self,option):
+    def mandr(self):
+        option= "constant"
         mandr_dict= {}
         computedmandr= v.mandr2020
         
@@ -94,21 +102,31 @@ class vehicle:
             purchase_dict[t]= computedpp
 
         return purchase_dict
+    
     @property
     def emission(self):
-        pass
+
+        emission_dict ={}
+        for t in range(interval):
+            fuel_consumed = self.annualmiles[t]/self.mpg[t]
+            emission_dict[t]= fuel_consumed * carbon_factor
+        
+        return emission_dict
+        
 
     @property
     def depreciation(self):
-        age= v.current_age
-        cur_depvalue = v.depreceated2020
+        age= self.current_age
+        cur_depvalue = self.depreceated2020
         depreciation_dict={}
+
         for t in range(interval):
             age+=1
+
             if 0<= age <=1:
                 cur_depvalue = cur_depvalue - 0.25*cur_depvalue
                 depreciation_dict[t] = cur_depvalue
-            elif 2 <= age > 30:
+            elif age >=2:
                 cur_depvalue = cur_depvalue - 0.12*cur_depvalue
                 depreciation_dict[t] = cur_depvalue
         
@@ -138,15 +156,13 @@ UI_params = {
     # 'initial_maintenance_budget':1000000,
     # 'maintenance_budget_rate':0.03,
 }
-class projections:
-    def __init__(self, vehicle):
-        self.v = vehicle
+
 
     
 
 # decides whether to keep or replace a given vehicle based on intrinsic numbers without the budget in mind
 class dynamic_prog:
-    def contributionfuncion(self,v,t):
+    def contributionfunction(self,v,t):
         decision= 'keep'
         #compute contribution function
         C_tx = np.zeros((t,interval-t))
@@ -160,6 +176,7 @@ class dynamic_prog:
 
         g_t[interval]= 10000
 
+        np.fill_diagonal(C_tx, 999999)
         #--- Current year costs ---- #
         # purchase cost adjusted with depreciation
         for x in range(t+1,interval):
@@ -179,14 +196,17 @@ class dynamic_prog:
                 g_t[i] = min(C_tx[i]+g_t[x])
 
         print(g_t)
+        print("hi")
         decision= {}
         return decision
 
 
-vehicle_info= pd.read_csv("vehicle_info17mar.csv")
+vehicle_info= pd.read_csv("vehicle_info_prefinal.csv",thousands=r',')
+print(vehicle_info.head(10))
 # replacement_info= pd.read_csv("replacement_info.csv")
 vportfolio=[]
 emission_to_dollar = 120
+carbon_factor = 2.412
 
 colnames= list(vehicle_info.columns.values)
 for index,row in vehicle_info.iterrows():
@@ -199,11 +219,11 @@ for index,row in vehicle_info.iterrows():
     age2020= row['age2020']
     current_age = age2020
     purchaseprice= row['purchaseprice']
-    depreciated2020 = row['depreceated_value']
+    depreciated2020 = row['depreceated value']
     miles2020= row['miles2020']
     vmt2020= row['cumulative_miles']
     mandr2020= row['maintenance2020']
-    cumulativemandr2020= row['cumulative_maintenace']
+    cumulativemandr2020= row['cumulative_maintenance']
     totcum_mandr = cumulativemandr2020
     mpg2020= row['mpg2020']
     emission2020= row['emissions2020']
@@ -215,29 +235,32 @@ for index,row in vehicle_info.iterrows():
     replacement_vehicle_type= row['replacement_vehicle_type']   
     decision = {}
     
-
+    
     v= vehicle(eq_no,eq_desc,vtype,dept,dept_id, purchasedate,age2020,current_age,purchaseprice,depreciated2020,miles2020,vmt2020,mandr2020,cumulativemandr2020,totcum_mandr, mpg2020,emission2020, vmt, replacementvehicle_id, replacement_vehicle_desc,replacement_vehicle_purchaseprice,replacement_vehicle_mpge,replacement_vehicle_type,decision)
-    proj= projections(v)
+    
     vportfolio.append(v)
 
-interval = UI_params['start_year'] - UI_params['end_year']
+interval =  UI_params['end_year']- UI_params['start_year']
+
 def main():
-    
+    print("interval:",interval)
     eligiblevehicles=[]
     
     for t in range(interval):
         for v in vportfolio:
-            #check if vehicle is eligible based on threshold miles
+            threshold = UI_params['min_miles_replacement_threshold']
             
-            if v.vmt>= UI_params['min_miles_replacement_threshold']:
+            #check if vehicle is eligible based on threshold miles
+           
+            if (v.vmt >= threshold):
                 eligiblevehicles.append(v)
                 #start DP calculations
                 dp_optimizer= dynamic_prog()
-                v.decision = dp_optimizer.contributionfuncion(v,t)
+                v.decision = dp_optimizer.contributionfunction(v,t)
 
             v.current_age+=1
             v.vmt= v.vmt+ v.annualmiles[t]
-            v.totcum_mandr = v.totcum_mandr+ v.mandr[t]
+            
 
 
             
