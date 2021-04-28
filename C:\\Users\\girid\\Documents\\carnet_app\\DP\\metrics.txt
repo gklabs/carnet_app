@@ -1,0 +1,144 @@
+=======================
+t: 2021
+Emission: 2617677.2681250777
+decrease %: 0
+AmtSpent: 0
+Budget: 5000000.0 Utilization: 1.60466
+Count: {'HEV': 84, 'PHEV': 0, 'ICE': 1374}
+Number of vehicles replaced: 0
+=======================
+t: 2021
+Emission: 2617677.2681250777
+decrease %: 0
+AmtSpent: 4999800.0
+Budget: 5000000.0 Utilization: 1.60466
+Count: {'HEV': 84, 'PHEV': 0, 'ICE': 1374}
+Number of vehicles replaced: 154
+=======================
+t: 2022
+Emission: 2617950.697347146
+decrease %: -0.00010445490183139671
+AmtSpent: 5150000.0
+Budget: 5150000.0 Utilization: 1.5579223300970875
+Count: {'HEV': 91, 'PHEV': 7, 'ICE': 1360}
+Number of vehicles replaced: 145
+=======================
+t: 2023
+Emission: 2542128.5116375023
+decrease %: 0.028860989629056706
+AmtSpent: 5303900.0
+Budget: 5304500.0 Utilization: 1.5125459515505704
+Count: {'HEV': 111, 'PHEV': 49, 'ICE': 1298}
+Number of vehicles replaced: 144
+=======================
+t: 2024
+Emission: 2391728.963589035
+decrease %: 0.08631633367771083
+AmtSpent: 5463600.0
+Budget: 5463635.0 Utilization: 1.468491215097641
+Count: {'HEV': 134, 'PHEV': 104, 'ICE': 1220}
+Number of vehicles replaced: 145
+=======================
+t: 2025
+Emission: 2155791.222430498
+decrease %: 0.1764488125862084
+AmtSpent: 5627400.0
+Budget: 5627544.050000001 Utilization: 1.425719626308389
+Count: {'HEV': 159, 'PHEV': 181, 'ICE': 1118}
+Number of vehicles replaced: 144
+=======================
+t: 2026
+Emission: 1924206.239498714
+decrease %: 0.26491845922743
+AmtSpent: 5796300.0
+Budget: 5796370.3715 Utilization: 1.3841938119498924
+Count: {'HEV': 202, 'PHEV': 245, 'ICE': 1011}
+Number of vehicles replaced: 141
+=======================
+t: 2027
+Emission: 1742429.4333670312
+decrease %: 0.3343604826369396
+AmtSpent: 5970200.0
+Budget: 5970261.482645 Utilization: 1.3438774873299928
+Count: {'HEV': 243, 'PHEV': 294, 'ICE': 921}
+Number of vehicles replaced: 145
+=======================
+t: 2028
+Emission: 1617227.4114267793
+decrease %: 0.3821899165648005
+AmtSpent: 6148900.0
+Budget: 6149369.327124351 Utilization: 1.3047354245922258
+Count: {'HEV': 275, 'PHEV': 343, 'ICE': 840}
+Number of vehicles replaced: 148
+=======================
+t: 2029
+Emission: 1549590.7575680506
+decrease %: 0.4080283400719022
+AmtSpent: 6333700.0
+Budget: 6333850.406938082 Utilization: 1.2667334219341997
+Count: {'HEV': 295, 'PHEV': 385, 'ICE': 778}
+Number of vehicles replaced: 162
+=======================
+t: 2030
+Emission: 1538955.7172864156
+decrease %: 0.4120911175621359
+AmtSpent: 6523800.0
+Budget: 6523865.919146225 Utilization: 1.229838273722524
+Count: {'HEV': 316, 'PHEV': 393, 'ICE': 749}
+Number of vehicles replaced: 179
+=======================
+t: 2031
+Emission: 1571913.5403597993
+decrease %: 0.3995006338250059
+AmtSpent: 6719200.0
+Budget: 6719581.8967206115 Utilization: 1.1940177414781785
+Count: {'HEV': 323, 'PHEV': 395, 'ICE': 740}
+Number of vehicles replaced: 184
+=======================
+t: 2032
+Emission: 1625332.3456909726
+decrease %: 0.3790936852749905
+AmtSpent: 6920700.0
+Budget: 6921169.35362223 Utilization: 1.1592405257069696
+Count: {'HEV': 334, 'PHEV': 397, 'ICE': 727}
+Number of vehicles replaced: 197
+=======================
+t: 2033
+Emission: 1699234.1652192855
+decrease %: 0.3508618553132911
+AmtSpent: 7128700.0
+Budget: 7128804.434230897 Utilization: 1.1254762385504558
+Count: {'HEV': 343, 'PHEV': 397, 'ICE': 718}
+Number of vehicles replaced: 209
+=======================
+t: 2034
+Emission: 1782143.3691261092
+decrease %: 0.3191890418169934
+AmtSpent: 7342500.0
+Budget: 7342668.567257824 Utilization: 1.0926953772334522
+Count: {'HEV': 349, 'PHEV': 397, 'ICE': 712}
+Number of vehicles replaced: 217
+=======================
+t: 2035
+Emission: 1872467.0175974716
+decrease %: 0.2846837765685936
+AmtSpent: 7562900.0
+Budget: 7562948.62427556 Utilization: 1.0608692982849048
+Count: {'HEV': 352, 'PHEV': 397, 'ICE': 709}
+Number of vehicles replaced: 225
+=======================
+t: 2036
+Emission: 1967861.0311017479
+decrease %: 0.2482415402907034
+AmtSpent: 7789700.0
+Budget: 7789837.0830038255 Utilization: 1.0299701925096165
+Count: {'HEV': 355, 'PHEV': 397, 'ICE': 706}
+Number of vehicles replaced: 229
+=======================
+t: 2037
+Emission: 2069801.5824578432
+decrease %: 0.20929840830212532
+AmtSpent: 8023300.0
+Budget: 8023532.195493941 Utilization: 0.999971060688948
+Count: {'HEV': 356, 'PHEV': 397, 'ICE': 705}
+Number of vehicles replaced: 239

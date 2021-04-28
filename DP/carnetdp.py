@@ -225,9 +225,9 @@ class vehicle:
     
 
 class portfolio:
-    def __init__(self,t,vset,totfuelcost,totmandrcost,amt_spent,totemission,percent_decrease,v_count,n_replaced):
+    def __init__(self,t,totfuelcost,totmandrcost,amt_spent,totemission,percent_decrease,v_count,n_replaced):
         self.t= t
-        self.portfolio= vset
+        # self.portfolio= vset
         self.totfuelcost= totfuelcost
         self.totmandrcost= totmandrcost
         self.amt_spent = amt_spent
@@ -416,10 +416,13 @@ class dynamic_prog:
         
 
 ### Read data
-vehicle_info= pd.read_csv(r"C:\Users\girid\Documents\carnet_app\DP\vehicle_info_prefinal.csv",thousands=r',')
+input_path_mac = "/Users/gkbytes/carnet_app/DP/"
+input_path_windows= r"C:\Users\girid\Documents\carnet_app\DP"
+
+vehicle_info= pd.read_csv(input_path_mac+r"vehicle_info_prefinal.csv",thousands=r',')
 # print(vehicle_info.head(10))
 # print(vehicle_info.shape)
-replacement_vehicle_info= pd.read_csv(r"C:\Users\girid\Documents\carnet_app\DP\replacement_vehicle_info.csv", thousands=r',')
+replacement_vehicle_info= pd.read_csv(input_path_mac+r"replacement_vehicle_info.csv", thousands=r',')
 
 vportfolio=[]
 replacement_fleet = []
@@ -468,7 +471,7 @@ replacement_fleet = read_info(replacement_vehicle_info)
 
 ## enter input
 UI_params = {
-    'initial_procurement_budget':6500000,
+    'initial_procurement_budget':5000000,
     'procurement_budget_growthrate':0.03,
     'start_year':2021,
     'end_year':2037,
@@ -512,7 +515,7 @@ def create_fleet_stat(vportfolio,amt_spent,t, n_replaced):
         percent_decrease= (BC_vehicle_fleet[0].totemission -totemission)/BC_vehicle_fleet[0].totemission
     else:
         percent_decrease =0
-    p= portfolio(t,vportfolio,totfuelcost,totmandrcost,amt_spent,totemission,percent_decrease,v_count,n_replaced)
+    p= portfolio(t,totfuelcost,totmandrcost,amt_spent,totemission,percent_decrease,v_count,n_replaced)
    
     BC_vehicle_fleet.append(p)
 
@@ -594,6 +597,7 @@ def main():
     
     ############ Second Stage model ###############
     values=[]
+         
     for v in vportfolio:
         v.ypd= v.decision- UI_params['start_year']
     
@@ -701,6 +705,12 @@ def main():
     stop2 = timeit.default_timer()
     print('Time: ', stop2 - start)
     
+    stat_df = pd.DataFrame([x.__dict__ for x in BC_vehicle_fleet])
+    stat_file_name= "stats_"+str(UI_params['initial_procurement_budget'])
+    stat_df.to_csv(input_path_mac+stat_file_name+".csv")
+
+    selected_df =pd.DataFrame(list(selected.items()),columns = ['year','vehicles_replaced'])
+    selected_df.to_csv(input_path_mac+"selected_vehicles"+str(UI_params['initial_procurement_budget'])+".csv")
 
             
                             
